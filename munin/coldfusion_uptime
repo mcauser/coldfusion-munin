@@ -1,0 +1,123 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+
+=head1 NAME
+
+coldfusion_uptime - Munin plugin to monitor the uptime of a
+ColdFusion server.
+
+=head1 APPLICABLE SYSTEMS
+
+Web servers with ColdFusion 8,9 or 10 installed.
+
+=head1 CONFIGURATION
+
+The plugin needs access to http://localhost/coldfusion_uptime.cfm
+(or modify the URL for another host).
+
+To check if setup correctly, run the plugin with "autoconf".
+If you see "yes", then everything should work.
+If you see a "no", double check your urls.
+
+This configuration section shows the defaults of the plugin:
+
+	[coldfusion_uptime]
+	env.url     http://127.0.0.1:%d/coldfusion_uptime.cfm
+	env.ports   80
+	env.timeout 30
+
+The %d in the url will be replaced with the port. The default port is
+80 as shown.
+
+If you need authenticated access to the URL you can specify the
+username and password in the URL.  For example:
+
+	[coldfusion_uptime]
+	env.url http://user:pass@localhost/coldfusion_uptime.cfm
+
+This will provide for HTTP basic authentication.
+
+=head1 INTERPRETATION
+
+The plugin shows the uptime of a ColdFusion server.
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf
+
+=head1 AUTHOR
+
+Mike Causer (mcauser@gmail.com)
+
+=head1 LICENSE
+
+GNU General Public License, version 2
+
+=cut
+
+use strict;
+use warnings;
+use Munin::Plugin;
+
+my $ret = undef;
+
+if (! eval "require LWP::UserAgent;") {
+	$ret = "LWP::UserAgent not found";
+	if ( ! defined $ARGV[0] ) {
+		die $ret;
+	}
+}
+
+my $url = exists $ENV{'url'} ? $ENV{'url'} : "http://localhost/coldfusion_uptime.cfm";
+my $port = exists $ENV{'port'} ? $ENV{'port'} : 80;
+my $timeout = exists $ENV{'timeout'} ? $ENV{'timeout'} : 30;
+$url = sprintf $url, $port;
+
+if ( defined($ARGV[0]) and $ARGV[0] eq "autoconf" ) {
+	
+	if ($ret) {
+		print "no ($ret)\n";
+		exit 0;
+	}
+	
+	my $ua = LWP::UserAgent->new(timeout => $timeout);
+	my $response = $ua->request(HTTP::Request->new('GET',$url));
+	
+	if ($response->is_success and $response->content =~ /^([0-9]+)$/im) {
+		print "yes\n";
+		exit 0;
+	}
+	elsif ($response->code != 200) {
+		print "no (" . $response->code . ": " . $url . ")\n";
+		exit 0;
+	}
+}
+
+if ( defined $ARGV[0] and $ARGV[0] eq "config" )
+{
+	print "graph_title ColdFusion uptime\n";
+	print "graph_category ColdFusion\n";
+	print "graph_args --base 1000\n";
+	print "graph_vlabel uptime in days\n";
+	print "graph_info Application server uptime in days\n";
+	print "uptime.info uptime\n";
+	print "uptime.label uptime\n";
+	print "uptime.draw AREA\n";
+	exit 0;
+}
+
+my $ua = LWP::UserAgent->new(timeout => $timeout);
+my $response = $ua->request(HTTP::Request->new('GET',$url));
+
+# response is expected to be a decimal number representing the uptime in whole seconds
+# the sprintf converts seconds to days with 4 decimal places
+if ($response->is_success and $response->content =~ /^([0-9]+)$/im) {
+	print "uptime.value ";
+	print sprintf "%0.*f", 4, $1/86400;
+	print "\n";
+} else {
+	print "uptime.value U\n";
+}
+
+# vim:syntax=perl
