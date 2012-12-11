@@ -14,7 +14,7 @@ Requirements
 * ColdFusion 8,9 or 10
 
 Installation
-============
+------------
 
 1. copy the plugin into /usr/share/munin/plugins/
 2. make a link in /etc/munin/plugins/
@@ -32,6 +32,13 @@ Installation
 5. restart munin
 
 	/etc/init.d/munin-node restart
+
+Screenshots
+-----------
+
+![ColdFusion Applications](https://raw.github.com/mcauser/coldfusion-munin/master/screenshots/coldfusion_applications-day.png)
+![ColdFusion Sessions](https://raw.github.com/mcauser/coldfusion-munin/master/screenshots/coldfusion_sessions-day.png)
+![ColdFusion Uptime](https://raw.github.com/mcauser/coldfusion-munin/master/screenshots/coldfusion_uptime-day.png)
 
 Testing
 -------
