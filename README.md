@@ -19,19 +19,19 @@ Installation
 1. copy the plugin into /usr/share/munin/plugins/
 2. make a link in /etc/munin/plugins/
 
-	ln -s /usr/share/munin/plugins/coldfusion_applications /etc/munin/plugins/coldfusion_applications
+		ln -s /usr/share/munin/plugins/coldfusion_applications /etc/munin/plugins/coldfusion_applications
 
 3. copy the ColdFusion template into your webroot or desired location
 4. if the templates are not accessible at the default location http://localhost:80/template_name.cfm customise the url in /etc/munin/plugin-conf.d/munin-node
 
-	[coldfusion_applications]
-	env.url     http://localhost:%d/coldfusion_applications.cfm
-	env.ports   80
-	env.timeout 30
+		[coldfusion_applications]
+		env.url     http://localhost:%d/coldfusion_applications.cfm
+		env.ports   80
+		env.timeout 30
 
 5. restart munin
 
-	/etc/init.d/munin-node restart
+		/etc/init.d/munin-node restart
 
 Screenshots
 -----------
